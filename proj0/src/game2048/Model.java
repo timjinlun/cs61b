@@ -127,6 +127,29 @@ public class Model {
         return false;
     }
 
+    public static boolean hasAdjacentTiles(Tile curr, Board b) {
+        int size = b.size();
+        int row = curr.row();
+        int col = curr.col(); // column from 0 - 3
+        // top:curr.col(), curr.row()+1
+        // bot: curr.col(), curr.row() - 1
+        // right : curr.col()+1, curr.row()
+        Tile topTile = row < size - 1 ? b.tile(col, row + 1) : null;
+        Tile botTile = row > 0 ? b.tile(col, row - 1) : null;
+        Tile rightTile = col < size - 1 ? b.tile(col + 1, row) : null;
+        Tile leftTile = col > 0 ? b.tile(col - 1, row) : null;
+        if (topTile != null && equalValue(curr, topTile)) {
+            return true;
+        } else if (botTile != null && equalValue(curr, botTile)) {
+            return true;
+        } else if (leftTile != null && equalValue(curr, leftTile)) {
+            return true;
+        } else return rightTile != null && equalValue(curr, rightTile);
+    }
+
+    public static boolean equalValue(Tile a, Tile b){
+        return  (a.value() == b.value());
+    }
     /**
      * Returns true if there are any valid moves on the board.
      * There are two ways that there can be valid moves:
@@ -135,9 +158,24 @@ public class Model {
      */
     public static boolean atLeastOneMoveExists(Board b) {
         // TODO: Fill in this function.
-
-
+        // leftTile (i-1,j)
+        // rightTile (i+1,j)
+        // topTile (i,j+1)
+        // botTIle (i, j-1)
+        // 当前位置为(0,0)时，左下两个位置皆为null；
+        //确定相邻的格子数值大于0.
+        int size = b.size();
+        if(emptySpaceExists(b)) return true;
+        else {
+            for (int i = 0; i < size; i++){
+                for (int j = 0; j < size; j++){
+                    Tile curr = b.tile(i,j);
+                    if (hasAdjacentTiles(curr,b)) return true;
+                }
+            }
+        }
         return false;
+
     }
 
     /** Tilt the board toward SIDE.
