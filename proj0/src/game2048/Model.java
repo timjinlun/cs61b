@@ -112,8 +112,18 @@ public class Model {
      */
     public static boolean maxTileExists(Board b) {
         // TODO: Fill in this function.
-
-
+        // 遍历board
+        for (int i = 0; i < b.size();i++){
+            for (int j = 0; j <b.size(); j++){
+                Tile t = b.tile(i,j); // 获取当前位置的tile
+                if (t != null){ // 如果该tile不是null
+                    int value = t.value(); // 获取该tile的value
+                    if (value == MAX_PIECE){ // 如果value为MAX_PIECE(2048)
+                        return true; // 返回true.
+                    }
+                }
+            }
+        }
         return false;
     }
 
