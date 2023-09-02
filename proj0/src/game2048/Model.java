@@ -1,5 +1,7 @@
 package game2048;
 
+import org.apache.commons.lang3.ObjectUtils;
+
 import java.util.Formatter;
 
 
@@ -93,8 +95,13 @@ public class Model {
      * */
     public static boolean emptySpaceExists(Board b) {
         // TODO: Fill in this function.
-
-
+        for (int i = 0; i < b.size(); i++) { //根据board的size()决定遍历多少列；
+            for (int j = 0; j < b.size(); j++) { // 根据board的size()决定遍历多少行；
+                if (b.tile(i, j) == null) { //如果i列j行没有tile
+                    return true; // 返回true；
+                }
+            }
+        }
         return false;
     }
 
