@@ -126,15 +126,23 @@ public class Model {
         }
         return false;
     }
-
+    /**
+     * This is a helper function for atLeastOneMoveExists.
+     * it takes two arguments, Tile curr and Board b,
+     * firstly it will check whether the current tile has adjacent tiles(top, bottom, left and right)
+     * based on its relative coordinate,
+     * i.e. if curr is (0,0), then the top is (0,1), bot is (0,-1), left(-1,0) and right(1,0).
+     * then check whether the adjacent tile is null, if it's not,
+     * then check if the adjacent has the same value as the curr tile and return true if they are.
+     * */
     public static boolean hasAdjacentTiles(Tile curr, Board b) {
         int size = b.size();
         int row = curr.row();
         int col = curr.col(); // column from 0 - 3
-        // top:curr.col(), curr.row()+1
-        // bot: curr.col(), curr.row() - 1
-        // right : curr.col()+1, curr.row()
+
         Tile topTile = row < size - 1 ? b.tile(col, row + 1) : null;
+        // if the current row is > 0, meaning the curr tile has a botTile adjacent;
+        // otherwise current tile is at the bottom row and doesn't have a botTile adjacent, therefore return null.
         Tile botTile = row > 0 ? b.tile(col, row - 1) : null;
         Tile rightTile = col < size - 1 ? b.tile(col + 1, row) : null;
         Tile leftTile = col > 0 ? b.tile(col - 1, row) : null;
@@ -147,6 +155,8 @@ public class Model {
         } else return rightTile != null && equalValue(curr, rightTile);
     }
 
+    /** This is a helper function for hasAdjacentTiles.
+     *  It compares whether two tiles has the same value and return true if they are.*/
     public static boolean equalValue(Tile a, Tile b){
         return  (a.value() == b.value());
     }
@@ -158,19 +168,13 @@ public class Model {
      */
     public static boolean atLeastOneMoveExists(Board b) {
         // TODO: Fill in this function.
-        // leftTile (i-1,j)
-        // rightTile (i+1,j)
-        // topTile (i,j+1)
-        // botTIle (i, j-1)
-        // 当前位置为(0,0)时，左下两个位置皆为null；
-        //确定相邻的格子数值大于0.
         int size = b.size();
         if(emptySpaceExists(b)) return true;
         else {
             for (int i = 0; i < size; i++){
                 for (int j = 0; j < size; j++){
-                    Tile curr = b.tile(i,j);
-                    if (hasAdjacentTiles(curr,b)) return true;
+                    Tile curr = b.tile(i,j); // take out the current tile
+                    if (hasAdjacentTiles(curr,b)) return true; // check whether it has adjacentTiles and then return.
                 }
             }
         }
