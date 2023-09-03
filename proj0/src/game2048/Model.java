@@ -89,7 +89,7 @@ public class Model {
             maxScore = Math.max(score, maxScore);
         }
     }
-    
+
     /** Returns true if at least one space on the Board is empty.
      *  Empty spaces are stored as null.
      * */
@@ -165,9 +165,9 @@ public class Model {
      * it takes two arguments, Tile curr and Board b,
      * it gets all the adjacent tiles(if there is one) from the current tiles and check whether
      * it's merge-able with the current tile, if any of the adjacent tiles meet all the criterion,
-     * then 
+     * then the current tile has at least one ValidAdjacent and therefore could move accordingly.
      * */
-    public static boolean isValidAdjacent(Tile curr, Board b) {
+    public static boolean hasValidAdjacent(Tile curr, Board b) {
         Tile topTile = getAdjacentTile(curr, b, "top");
         Tile botTile = getAdjacentTile(curr, b, "bottom");
         Tile rightTile = getAdjacentTile(curr, b, "right");
@@ -176,7 +176,6 @@ public class Model {
         return canMerge(curr, topTile) || canMerge(curr, botTile) ||
                 canMerge(curr, leftTile) || canMerge(curr, rightTile);
     }
-
 
 
     /**
@@ -193,11 +192,23 @@ public class Model {
             for (int i = 0; i < size; i++){
                 for (int j = 0; j < size; j++){
                     Tile curr = b.tile(i,j); // take out the current tile
-                    if (isValidAdjacent(curr,b)) return true; // check whether it has adjacentTiles and then return.
+                    if (hasValidAdjacent(curr,b)) return true; // check whether it has adjacentTiles and then return.
                 }
             }
         }
         return false;
+    }
+
+    // 如果当前tile的row等于board row，则返回true
+    public static boolean meetTheEdge(Tile curr, Board b) {
+        //如果curr是null，就直接返回false
+        if (curr == null) {
+            return false;
+        }
+        int tile_Y_cord = curr.row();
+        int boardEdge = b.size();
+        //如果curr不是null，就继续判断它是否在边缘
+        return tile_Y_cord == boardEdge;
     }
 
     /** Tilt the board toward SIDE.
@@ -215,9 +226,25 @@ public class Model {
     public void tilt(Side side) {
         // TODO: Modify this.board (and if applicable, this.score) to account
         // for the tilt to the Side SIDE.
+        // 用户输入的方向：
 
-        //
+        // board.setViewingPerspective(s)，不管输入东西南北，对应的边都会指向最上面
+        // 调用board.setViewingPerspective(Side.NORTH)等于将棋盘转回去
+        int boardSize = board.size();
 
+        if (side != Side.NORTH){
+            board.setViewingPerspective(side); // 初始化棋盘方位
+        }
+        for (int c = 0; c < boardSize; c++) { // 遍历每个格子
+            for (int r = 0; r < boardSize; r++) {
+                Tile curr = board.tile(c, r); // 获取当前格子中的方块
+                if (!meetTheEdge(curr, board)) { // 如果当前格子没有处于边
+                if (atLeastOneMoveExists(board)){ // 如果当前还有移动的空间
+                    tilt(Side.NORTH);
+                    }
+                }
+            }
+        }
 
         checkGameOver();
     }
