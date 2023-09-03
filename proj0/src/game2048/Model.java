@@ -126,40 +126,59 @@ public class Model {
         }
         return false;
     }
-    /**
-     * This is a helper function for atLeastOneMoveExists.
-     * it takes two arguments, Tile curr and Board b,
-     * firstly it will check whether the current tile has adjacent tiles(top, bottom, left and right)
-     * based on its relative coordinate,
-     * i.e. if curr is (0,0), then the top is (0,1), bot is (0,-1), left(-1,0) and right(1,0).
-     * then check whether the adjacent tile is null, if it's not,
-     * then check if the adjacent has the same value as the curr tile and return true if they are.
-     * */
-    public static boolean hasAdjacentTiles(Tile curr, Board b) {
+
+    /** This is a helper function for isValidAdjacent and canMergeTogether.
+     *  It returns the adjacent tile of the current tile in the given direction, or null if there is no adjacent tile.
+     *  The direction parameter can be one of the following values: "top", "bottom", "left", or "right".
+     */
+    public static Tile getAdjacentTile(Tile curr, Board b, String direction) {
         int size = b.size();
         int row = curr.row();
-        int col = curr.col(); // column from 0 - 3
+        int col = curr.col();
 
-        Tile topTile = row < size - 1 ? b.tile(col, row + 1) : null;
-        // if the current row is > 0, meaning the curr tile has a botTile adjacent;
-        // otherwise current tile is at the bottom row and doesn't have a botTile adjacent, therefore return null.
-        Tile botTile = row > 0 ? b.tile(col, row - 1) : null;
-        Tile rightTile = col < size - 1 ? b.tile(col + 1, row) : null;
-        Tile leftTile = col > 0 ? b.tile(col - 1, row) : null;
-        if (topTile != null && equalValue(curr, topTile)) {
-            return true;
-        } else if (botTile != null && equalValue(curr, botTile)) {
-            return true;
-        } else if (leftTile != null && equalValue(curr, leftTile)) {
-            return true;
-        } else return rightTile != null && equalValue(curr, rightTile);
+        switch (direction) {
+            case "top":
+                return row < size - 1 ? b.tile(col, row + 1) : null;
+            case "bottom":
+                return row > 0 ? b.tile(col, row - 1) : null;
+            case "left":
+                return col > 0 ? b.tile(col - 1, row) : null;
+            case "right":
+                return col < size - 1 ? b.tile(col + 1, row) : null;
+            default:
+                return null; // invalid direction
+        }
     }
-
-    /** This is a helper function for hasAdjacentTiles.
-     *  It compares whether two tiles has the same value and return true if they are.*/
+    /** This function returns true if the two given values from tiles are equal.*/
     public static boolean equalValue(Tile a, Tile b){
         return  (a.value() == b.value());
     }
+
+    /** This function checks whether two tiles can merge or not,
+     * it returns true if the current tile has an adjacent tile and both of the value are the same.*/
+    public static boolean canMerge(Tile curr, Tile adj){
+        return adj != null && equalValue(curr, adj);
+    }
+
+    /**
+     * This is a helper function for atLeastOneMoveExists.
+     * it takes two arguments, Tile curr and Board b,
+     * it gets all the adjacent tiles(if there is one) from the current tiles and check whether
+     * it's merge-able with the current tile, if any of the adjacent tiles meet all the criterion,
+     * then 
+     * */
+    public static boolean isValidAdjacent(Tile curr, Board b) {
+        Tile topTile = getAdjacentTile(curr, b, "top");
+        Tile botTile = getAdjacentTile(curr, b, "bottom");
+        Tile rightTile = getAdjacentTile(curr, b, "right");
+        Tile leftTile = getAdjacentTile(curr, b, "left");
+
+        return canMerge(curr, topTile) || canMerge(curr, botTile) ||
+                canMerge(curr, leftTile) || canMerge(curr, rightTile);
+    }
+
+
+
     /**
      * Returns true if there are any valid moves on the board.
      * There are two ways that there can be valid moves:
@@ -174,12 +193,11 @@ public class Model {
             for (int i = 0; i < size; i++){
                 for (int j = 0; j < size; j++){
                     Tile curr = b.tile(i,j); // take out the current tile
-                    if (hasAdjacentTiles(curr,b)) return true; // check whether it has adjacentTiles and then return.
+                    if (isValidAdjacent(curr,b)) return true; // check whether it has adjacentTiles and then return.
                 }
             }
         }
         return false;
-
     }
 
     /** Tilt the board toward SIDE.
@@ -197,6 +215,8 @@ public class Model {
     public void tilt(Side side) {
         // TODO: Modify this.board (and if applicable, this.score) to account
         // for the tilt to the Side SIDE.
+
+        //
 
 
         checkGameOver();
