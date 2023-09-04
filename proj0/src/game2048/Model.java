@@ -9,11 +9,17 @@ import java.util.Formatter;
  *  @author P. N. Hilfinger + Josh Hug
  */
 public class Model {
-    /** Current contents of the board. */
+    /**
+     * Current contents of the board.
+     */
     private final Board board;
-    /** Current score. */
+    /**
+     * Current score.
+     */
     private int score;
-    /** Maximum score so far.  Updated when game ends. */
+    /**
+     * Maximum score so far.  Updated when game ends.
+     */
     private int maxScore;
 
     /* Coordinate System: column C, row R of the board (where row 0,
@@ -21,68 +27,89 @@ public class Model {
      * to board.tile(c, r).  Be careful! It works like (x, y) coordinates.
      */
 
-    /** Largest piece value. */
+    /**
+     * Largest piece value.
+     */
     public static final int MAX_PIECE = 2048;
 
-    /** A new 2048 game on a board of size SIZE with no pieces
-     *  and score 0. */
+    /**
+     * A new 2048 game on a board of size SIZE with no pieces
+     * and score 0.
+     */
     public Model(int size) {
         board = new Board(size);
         score = maxScore = 0;
     }
 
-    /** A new 2048 game where RAWVALUES contain the values of the tiles
+    /**
+     * A new 2048 game where RAWVALUES contain the values of the tiles
      * (0 if null). VALUES is indexed by (row, col) with (0, 0) corresponding
-     * to the bottom-left corner. Used for testing purposes. */
+     * to the bottom-left corner. Used for testing purposes.
+     */
     public Model(int[][] rawValues, int score, int maxScore) {
         board = new Board(rawValues);
         this.score = score;
         this.maxScore = maxScore;
     }
 
-    /** Return the current Tile at (COL, ROW), where 0 <= ROW < size(),
-     *  0 <= COL < size(). Returns null if there is no tile there.
-     *  Used for testing. */
+    /**
+     * Return the current Tile at (COL, ROW), where 0 <= ROW < size(),
+     * 0 <= COL < size(). Returns null if there is no tile there.
+     * Used for testing.
+     */
     public Tile tile(int col, int row) {
         return board.tile(col, row);
     }
 
-    /** Return the number of squares on one side of the board. */
+    /**
+     * Return the number of squares on one side of the board.
+     */
     public int size() {
         return board.size();
     }
 
-    /** Return the current score. */
+    /**
+     * Return the current score.
+     */
     public int score() {
         return score;
     }
 
-    /** Return the current maximum game score (updated at end of game). */
+    /**
+     * Return the current maximum game score (updated at end of game).
+     */
     public int maxScore() {
         return maxScore;
     }
 
-    /** Clear the board to empty and reset the score. */
+    /**
+     * Clear the board to empty and reset the score.
+     */
     public void clear() {
         score = 0;
         board.clear();
     }
 
-    /** Add TILE to the board. There must be no Tile currently at the
-     *  same position. */
+    /**
+     * Add TILE to the board. There must be no Tile currently at the
+     * same position.
+     */
     public void addTile(Tile tile) {
         board.addTile(tile);
         checkGameOver();
     }
 
-    /** Return true iff the game is over (there are no moves, or
-     *  there is a tile with value 2048 on the board). */
+    /**
+     * Return true iff the game is over (there are no moves, or
+     * there is a tile with value 2048 on the board).
+     */
     public boolean gameOver() {
         return maxTileExists(board) || !atLeastOneMoveExists(board);
     }
 
-    /** Checks if the game is over and sets the maxScore variable
-     *  appropriately.
+    /**
+     * Checks if the game is over and sets the maxScore variable
+     * appropriately.
      */
     private void checkGameOver() {
         if (gameOver()) {
@@ -90,9 +117,10 @@ public class Model {
         }
     }
 
-    /** Returns true if at least one space on the Board is empty.
-     *  Empty spaces are stored as null.
-     * */
+    /**
+     * Returns true if at least one space on the Board is empty.
+     * Empty spaces are stored as null.
+     */
     public static boolean emptySpaceExists(Board b) {
         // TODO: Fill in this function.
         for (int i = 0; i < b.size(); i++) { //根据board的size()决定遍历多少列；
@@ -113,12 +141,12 @@ public class Model {
     public static boolean maxTileExists(Board b) {
         // TODO: Fill in this function.
         // 遍历board
-        for (int i = 0; i < b.size();i++){
-            for (int j = 0; j <b.size(); j++){
-                Tile t = b.tile(i,j); // 获取当前位置的tile
-                if (t != null){ // 如果该tile不是null
+        for (int i = 0; i < b.size(); i++) {
+            for (int j = 0; j < b.size(); j++) {
+                Tile t = b.tile(i, j); // 获取当前位置的tile
+                if (t != null) { // 如果该tile不是null
                     int value = t.value(); // 获取该tile的value
-                    if (value == MAX_PIECE){ // 如果value为MAX_PIECE(2048)
+                    if (value == MAX_PIECE) { // 如果value为MAX_PIECE(2048)
                         return true; // 返回true.
                     }
                 }
@@ -127,9 +155,10 @@ public class Model {
         return false;
     }
 
-    /** This is a helper function for isValidAdjacent and canMergeTogether.
-     *  It returns the adjacent tile of the current tile in the given direction, or null if there is no adjacent tile.
-     *  The direction parameter can be one of the following values: "top", "bottom", "left", or "right".
+    /**
+     * This is a helper function for isValidAdjacent and canMergeTogether.
+     * It returns the adjacent tile of the current tile in the given direction, or null if there is no adjacent tile.
+     * The direction parameter can be one of the following values: "top", "bottom", "left", or "right".
      */
     public static Tile getAdjacentTile(Tile curr, Board b, String direction) {
         int size = b.size();
@@ -149,14 +178,19 @@ public class Model {
                 return null; // invalid direction
         }
     }
-    /** This function returns true if the two given values from tiles are equal.*/
-    public static boolean equalValue(Tile a, Tile b){
-        return  (a.value() == b.value());
+
+    /**
+     * This function returns true if the two given values from tiles are equal.
+     */
+    public static boolean equalValue(Tile a, Tile b) {
+        return (a.value() == b.value());
     }
 
-    /** This function checks whether two tiles can merge or not,
-     * it returns true if the current tile has an adjacent tile and both of the value are the same.*/
-    public static boolean canMerge(Tile curr, Tile adj){
+    /**
+     * This function checks whether two tiles can merge or not,
+     * it returns true if the current tile has an adjacent tile and both of the value are the same.
+     */
+    public static boolean canMerge(Tile curr, Tile adj) {
         return adj != null && equalValue(curr, adj);
     }
 
@@ -166,7 +200,7 @@ public class Model {
      * it gets all the adjacent tiles(if there is one) from the current tiles and check whether
      * it's merge-able with the current tile, if any of the adjacent tiles meet all the criterion,
      * then the current tile has at least one ValidAdjacent and therefore could move accordingly.
-     * */
+     */
     public static boolean hasValidAdjacent(Tile curr, Board b) {
         Tile topTile = getAdjacentTile(curr, b, "top");
         Tile botTile = getAdjacentTile(curr, b, "bottom");
@@ -187,12 +221,12 @@ public class Model {
     public static boolean atLeastOneMoveExists(Board b) {
         // TODO: Fill in this function.
         int size = b.size();
-        if(emptySpaceExists(b)) return true;
+        if (emptySpaceExists(b)) return true;
         else {
-            for (int i = 0; i < size; i++){
-                for (int j = 0; j < size; j++){
-                    Tile curr = b.tile(i,j); // take out the current tile
-                    if (hasValidAdjacent(curr,b)) return true; // check whether it has adjacentTiles and then return.
+            for (int i = 0; i < size; i++) {
+                for (int j = 0; j < size; j++) {
+                    Tile curr = b.tile(i, j); // take out the current tile
+                    if (hasValidAdjacent(curr, b)) return true; // check whether it has adjacentTiles and then return.
                 }
             }
         }
@@ -210,6 +244,29 @@ public class Model {
         //如果curr不是null，就继续判断它是否在边缘
         return tile_Y_cord == boardEdge;
     }
+    /** Check if the current tile has a none Null tile exist in the same column
+     * None Null Tile is referring to a tile that is not null, but has different
+     * value compare to the current tile.*/
+    public static boolean ifNoneNullTailExist(Tile curr, Board b) {
+        int size = b.size();
+        int currentColumn = curr.col();
+        for (int r = 0; r < size; r++) {
+            Tile t = b.tile(currentColumn, r);
+            if (meetTheEdge(t, b) && (!equalValue(curr, t))) { // 如果当前格子在边缘，并且和curr的值不相等，就返回true
+                return true;
+            }
+            if (t != null && r > curr.row()) { // 如果当前格子不为空，并且在curr的上方，就判断它们是否有尾巴
+                // 如果它们的值相等，就返回true
+                // 如果它们的值不相等，就返回false
+                return equalValue(curr, t);
+            }
+            if (t == null && r > curr.row()) { // 如果当前格子为空，并且在curr的上方，就返回false
+                return false;
+            }
+        }
+        return false; // 如果遍历完所有行都没有找到尾巴，就返回false
+    }
+
 
     /** Tilt the board toward SIDE.
      *
@@ -226,23 +283,11 @@ public class Model {
     public void tilt(Side side) {
         // TODO: Modify this.board (and if applicable, this.score) to account
         // for the tilt to the Side SIDE.
-        // 用户输入的方向：
+        for (int c = 0; c < board.size(); c++){
+            for (int r = 1; r < board.size(); r++){ // 因为所有移动都是向上，所以无需遍历第一行
+                Tile curr = board.tile(c,r);
+                if (curr == null);continue;
 
-        // board.setViewingPerspective(s)，不管输入东西南北，对应的边都会指向最上面
-        // 调用board.setViewingPerspective(Side.NORTH)等于将棋盘转回去
-        int boardSize = board.size();
-
-        if (side != Side.NORTH){
-            board.setViewingPerspective(side); // 初始化棋盘方位
-        }
-        for (int c = 0; c < boardSize; c++) { // 遍历每个格子
-            for (int r = 0; r < boardSize; r++) {
-                Tile curr = board.tile(c, r); // 获取当前格子中的方块
-                if (!meetTheEdge(curr, board)) { // 如果当前格子没有处于边
-                if (atLeastOneMoveExists(board)){ // 如果当前还有移动的空间
-                    tilt(Side.NORTH);
-                    }
-                }
             }
         }
 

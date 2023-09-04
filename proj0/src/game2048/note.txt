@@ -1,0 +1,146 @@
+规则总结：
+1. 在一个回合中，一个方块一次只能和一个有同样数值的方块结合。如果结合成功，那么更新后的方块就是该回合的最终状态。
+2. 当一个方块没碰到另一个和它有同样数值的方块之前，这个方块会一直按照既定方向移动，直到碰到board边缘或者其他和它数值不同地方块。
+3. 当一个方块与另一个方块成功结合时，得分将根据两个方块的数值相加。如4+4 = 8；
+4. 在一个回合结束后，需要计算该回合的总得分。
+5. 每个回合的开始，都会将新的数值展现到融合后的方块
+
+棋盘的方块是如何移动的：
+首先，假设棋盘的标准方向是北边在上。
+假设现在用户向右滑动棋盘，此时程序会把棋盘西面的边旋转至北面，然后用相同的函数来计算所有方格向下移动和合并后的位置和值，
+最后再把棋盘旋转回初始位置；此时动画会根据棋盘方格内原先的位置和计算后移动的位置，来对方格的移动路径进行渲染，并在屏幕上显示出来。
+
+当前function:
+maxTileExists：检查是否存在最大数值(2048)的tile
+
+hasMergeAdjacent：当前tile与特定方向tile进行结合
+
+
+Board:
+atLeastOneMoveExists：检查是否能够继续移动board
+    emptySpaceExists：检查当前是否有空余位置
+        hasValidAdjacent：检查当前tile周围是否存在能够merge的tile
+            canMerge：检查两个tile是否能够merge
+                equalValue：检查两个tile的数值是否相等
+                    getAdjacentTile：获取当前tile的所有相邻tiles
+
+
+MeetTheEdge: 检测该方块的下一格是否是棋盘边缘
+
+ifNoneNullTileExist()
+    equalValue()
+
+
+
+moveToNearestTile：将当前方块移动到距离其最近的非相同数值方块的下方
+moveToEdges: 将当前方块移动到edges。
+
+要等到方块移动到棋盘边的时候
+
+棋盘要从上往下更新。
+LOGIC:
+更新board，包含score，max score，结合后方块的位置与更新分数，每个格子当前位置与数值；随机在任意位置添加新的方块。
+
+开始本轮游戏
+检查本轮棋盘状态if (atLeastOneMoveExists)，
+    如果是：
+        用户输入移动方向
+        根据用户输入的移动方向，使得用户输入的方向变成新的上边（看起来所有方块都朝上方移动)
+        获取棋盘上的每个方块,第0行是默认行，但从从第一行往下，依次遍历：
+            该格子是否为空：
+                如果是：
+                    继续遍历；
+                如果不是：
+                    该格子上方是否存在非空格子：
+                        如果有：
+                            检测两个格子能否合并：
+                                如果能：
+                                    合并成更大的数字，并增加分数
+                                如果不能：
+                                    将该格子移动到最近非空格子之下的位置
+                        如果没有：
+                            将该格子移动到其所在列的第0行（初始位置）；
+        全部遍历后，将棋盘旋转回原来的样子
+        更新分数和最大分数。
+
+
+    如果不是：
+        停止移动，将棋盘旋转回原先位置，结束本轮游戏
+
+
+
+
+NOTE:
+1. 上下移动需要更新row；左右移动需要更新column
+2. 每次移动，所有方格都假定要一直按照特定方向移动1格，直到碰到board边缘、有相同数值的方格或者数值不同的方格
+3、方格在每次移动时只移动一格，所有方格要在移动前检查前方位置：
+    是否是边缘
+
+
+preCheck(当前格子，格子要移动的位置):
+    获取当前格子的位置
+    检查格子要移动的位置
+
+
+Merge():
+假设方块A和方块B
+如果两个方块为equalValue且相邻，那么方块A结合方块B意味着：
+    方块A移动到方块B，方块B的数值添加到方块A的数值上，方块B消失；
+
+
+
+movingToSide:
+方块根据指定方向，每次移动一格，直到碰到边缘。
+
+
+hasObstacles(当前格子的位置，):
+方格MovingToSide时，检查方块前方的位置：
+    if(isBoardEdges),方块不动
+    前方的格子是否(canMergetherTogether),如果是，(merge)
+    前方的格子是否数值不同。
+
+
+关于棋盘的旋转和倾斜：
+
+如果用户准备向左移动，那么棋盘需要先将West边旋转至North边，然后再向上倾斜，最后再转回来。
+
+
+
+public void tilt(Side side) {
+        // TODO: Modify this.board (and if applicable, this.score) to account
+        // for the tilt to the Side SIDE.
+        // 用户输入的方向：
+        // board.setViewingPerspective(s)，不管输入东西南北，对应的边都会指向最上面
+        // 调用board.setViewingPerspective(Side.NORTH)等于将棋盘转回去
+        if (side != Side.NORTH){
+            board.setViewingPerspective(side); // 初始化棋盘方位
+        }
+        for (int c = 0; c < board.size(); c++){
+            int lastMergePosition = 0; // 记录最后一次合并的位置
+            for (int r = 1; r < board.size(); r++) {
+                Tile current = board.tile(c, r);
+                if (current == null) continue;
+                int previousPosition = r - 1; // 前一个格子的位置
+                while (previousPosition > lastMergePosition && board.tile(c, previousPosition) == null) { // 如果前一个格子为空，并且没有超过最后一次合并的位置，继续向上寻找
+                    previousPosition--;
+                }
+                Tile previous = board.tile(c, previousPosition); // 前一个格子
+                if (previous == null) { // 如果前一个格子为空，将当前格子移动到那里
+                    board.move(c, previousPosition, current);
+                } else if (canMerge(current, previous)) { // 如果前一个格子和当前格子可以合并，将它们合并成一个更大的数字，并增加分数
+                    int value = previous.value() + current.value();
+                    Tile merged = Tile.create(value, current.col(), current.row());
+                    board.move(c, previousPosition, merged);
+                    score += value;
+                    lastMergePosition = previousPosition + 1;
+                } else if (previousPosition + 1 != r) {
+                    board.move(c, previousPosition + 1, current);
+                }
+            }
+        }
+        if (side != Side.NORTH){
+            board.setViewingPerspective(Side.NORTH); // 恢复棋盘方位
+        }
+
+        checkGameOver();
+    }
