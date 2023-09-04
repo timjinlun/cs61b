@@ -190,7 +190,7 @@ public class Model {
      * This function checks whether two tiles can merge or not,
      * it returns true if the current tile has an adjacent tile and both of the value are the same.
      */
-    public static boolean canMerge(Tile curr, Tile adj) {
+    public static boolean canMergeWith(Tile curr, Tile adj) {
         return adj != null && equalValue(curr, adj);
     }
 
@@ -207,8 +207,8 @@ public class Model {
         Tile rightTile = getAdjacentTile(curr, b, "right");
         Tile leftTile = getAdjacentTile(curr, b, "left");
 
-        return canMerge(curr, topTile) || canMerge(curr, botTile) ||
-                canMerge(curr, leftTile) || canMerge(curr, rightTile);
+        return canMergeWith(curr, topTile) || canMergeWith(curr, botTile) ||
+                canMergeWith(curr, leftTile) || canMergeWith(curr, rightTile);
     }
 
 
@@ -247,26 +247,41 @@ public class Model {
     /** Check if the current tile has a none Null tile exist in the same column
      * None Null Tile is referring to a tile that is not null, but has different
      * value compare to the current tile.*/
-    public static boolean ifNoneNullTailExist(Tile curr, Board b) {
+    public static boolean noneNullTileExist(Tile curr, Board b) {
         int size = b.size();
         int currentColumn = curr.col();
         for (int r = 0; r < size; r++) {
             Tile t = b.tile(currentColumn, r);
-            if (meetTheEdge(t, b) && (!equalValue(curr, t))) { // 如果当前格子在边缘，并且和curr的值不相等，就返回true
+            if (meetTheEdge(t, b)) { // 如果当前格子在棋盘最顶部，直接返回true，意味着第一行有格子
                 return true;
             }
-            if (t != null && r > curr.row()) { // 如果当前格子不为空，并且在curr的上方，就判断它们是否有尾巴
-                // 如果它们的值相等，就返回true
-                // 如果它们的值不相等，就返回false
-                return equalValue(curr, t);
+            if (t != null && r > curr.row()) { // 如果当前格子不为空，并且在curr的上方，返回true
+                return true;
             }
             if (t == null && r > curr.row()) { // 如果当前格子为空，并且在curr的上方，就返回false
                 return false;
             }
         }
-        return false; // 如果遍历完所有行都没有找到尾巴，就返回false
+        return false; // 如果遍历完所有行都没有找到tile，就返回false
     }
 
+    public static Tile getNearestNonNullTile(Tile curr, Board b) {
+        int size = b.size();
+        int currentColumn = curr.col();
+        for (int r = 0; r < size; r++) {
+            Tile t = b.tile(currentColumn, r);
+            if (meetTheEdge(t, b)) { // 如果当前格子在边缘，就返回t
+                return t;
+            }
+            if (t != null && r > curr.row()) { // 如果当前格子不为空，并且在curr的上方，就返回t
+                return t;
+            }
+            if (t == null && r > curr.row()) { // 如果当前格子为空，并且在curr的上方，就返回null
+                return null;
+            }
+        }
+        return null; // 如果遍历完所有行都没有找到非空格子，就返回null
+    }
 
     /** Tilt the board toward SIDE.
      *
@@ -283,14 +298,36 @@ public class Model {
     public void tilt(Side side) {
         // TODO: Modify this.board (and if applicable, this.score) to account
         // for the tilt to the Side SIDE.
+        if (side != Side.NORTH){
+            board.setViewingPerspective(Side.NORTH); // 初始化棋盘方位
+        }
         for (int c = 0; c < board.size(); c++){
-            for (int r = 1; r < board.size(); r++){ // 因为所有移动都是向上，所以无需遍历第一行
-                Tile curr = board.tile(c,r);
-                if (curr == null);continue;
+            for (int r = 1; r < board.size(); r++) { // 所有移动都是从下往上，第一行的所有tile永远不会移动，因此直接跳过第一行的遍历
+                Tile curr = board.tile(c, r);
+                if (curr != null) {
+                    if (noneNullTileExist(curr, board)) {
+                        Tile nearestTile = getNearestNonNullTile(curr, board);
+                        if (canMergeWith(curr,nearestTile)){
+                            int value = nearestTile.value() + curr.value();
+                            score += value;
+                            int colIndex = nearestTile.col();
+                            int rowIndex = nearestTile.row();
+                            board.move(colIndex,rowIndex,curr);
+                        }else {
+                            int colIndex = nearestTile.col();
+                            int rowIndex = nearestTile.row() - 1;
+                            board.move(colIndex,rowIndex,curr);
+                        }
+                    }else{
+                        board.move(c, board.size()-1, curr);
 
+                    }
+                }
             }
         }
 
+        if (side != Side.NORTH){
+            board.setViewingPerspective(Side.SOUTH);} // 恢复棋盘方位
         checkGameOver();
     }
 
